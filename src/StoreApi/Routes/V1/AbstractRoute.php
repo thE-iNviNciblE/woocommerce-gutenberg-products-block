@@ -37,6 +37,13 @@ abstract class AbstractRoute implements RouteInterface {
 	protected $schema_controller;
 
 	/**
+	 * The routes identifier.
+	 *
+	 * @var string
+	 */
+	const IDENTIFIER = '';
+
+	/**
 	 * The routes schema.
 	 *
 	 * @var string
@@ -124,6 +131,20 @@ abstract class AbstractRoute implements RouteInterface {
 			$response = $this->error_to_response( $response );
 		}
 
+		return $response;
+	}
+
+	/**
+	 * Add rate limit headers to a response object.
+	 *
+	 * @param \WP_REST_Response $response The response object.
+	 * @param array             $headers Headers to append.
+	 * @return \WP_REST_Response
+	 */
+	protected function add_response_headers( \WP_REST_Response $response, $headers ) {
+		foreach ( $headers as $header => $value ) {
+			$response->header( $header, $value );
+		}
 		return $response;
 	}
 
