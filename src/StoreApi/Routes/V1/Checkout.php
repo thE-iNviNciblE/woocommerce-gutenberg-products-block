@@ -48,6 +48,13 @@ class Checkout extends AbstractCartRoute {
 	}
 
 	/**
+	 * Request rate limit.
+	 *
+	 * @var integer
+	 */
+	protected $rate_limit = 10;
+
+	/**
 	 * Checks if a nonce is required for the route.
 	 *
 	 * @param \WP_REST_Request $request Request.
@@ -67,7 +74,7 @@ class Checkout extends AbstractCartRoute {
 			[
 				'methods'             => \WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'get_response' ],
-				'permission_callback' => '__return_true',
+				'permission_callback' => [ $this, 'permission_callback' ],
 				'args'                => [
 					'context' => $this->get_context_param( [ 'default' => 'view' ] ),
 				],
@@ -75,7 +82,7 @@ class Checkout extends AbstractCartRoute {
 			[
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'get_response' ],
-				'permission_callback' => '__return_true',
+				'permission_callback' => [ $this, 'permission_callback' ],
 				'args'                => array_merge(
 					[
 						'payment_data' => [
