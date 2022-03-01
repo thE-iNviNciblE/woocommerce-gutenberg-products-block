@@ -107,27 +107,13 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	}
 
 	/**
-	 * Get a list of nonce headers.
-	 *
-	 * @return array
-	 */
-	protected function get_nonce_headers() {
-		return [
-			'X-WC-Store-API-Nonce'           => wp_create_nonce( 'wc_store_api' ),
-			'X-WC-Store-API-Nonce-Timestamp' => time(),
-			'X-WC-Store-API-User'            => get_current_user_id(),
-		];
-	}
-
-	/**
 	 * Add nonce headers to the response.
 	 */
 	protected function add_nonce_headers() {
 		$server = rest_get_server();
-
-		foreach ( $this->get_nonce_headers() as $header => $value ) {
-			$server->send_header( $header, $value );
-		}
+		$server->send_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$server->send_header( 'X-WC-Store-API-Nonce-Timestamp', time() );
+		$server->send_header( 'X-WC-Store-API-User', get_current_user_id() );
 	}
 
 	/**
