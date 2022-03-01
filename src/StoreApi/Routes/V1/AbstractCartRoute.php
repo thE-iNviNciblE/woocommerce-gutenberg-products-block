@@ -80,6 +80,15 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		$this->cart_controller->load_cart();
 		$this->calculate_totals();
 
+		if ( $this->requires_nonce( $request ) ) {
+			$this->add_nonce_headers();
+			$nonce_error = $this->check_nonce( $request );
+
+			if ( is_wp_error( $nonce_error ) ) {
+				return $nonce_error;
+			}
+		}
+
 		try {
 			$response = parent::get_response( $request );
 		} catch ( RouteException $error ) {
@@ -94,10 +103,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 			$this->cart_updated( $request );
 		}
 
-		return $this->add_response_headers(
-			$response,
-			$this->requires_nonce( $request ) ? $this->get_nonce_headers() : []
-		);
+		return $response;
 	}
 
 	/**
@@ -154,6 +160,19 @@ abstract class AbstractCartRoute extends AbstractRoute {
 			'X-WC-Store-API-Nonce-Timestamp' => time(),
 			'X-WC-Store-API-User'            => get_current_user_id(),
 		];
+	}
+
+	/**
+	 * Get a list of nonce headers.
+	 *
+	 * @return array
+	 */
+	protected function add_nonce_headers() {
+		$server = rest_get_server();
+
+		foreach ( $this->get_nonce_headers() as $header => $value ) {
+			$server->send_header( $header, $value );
+		}
 	}
 
 	/**
@@ -219,32 +238,5 @@ abstract class AbstractCartRoute extends AbstractRoute {
 				);
 		}
 		return new \WP_Error( $error_code, $error_message, [ 'status' => $http_status_code ] );
-	}
-
-	/**
-	 * Runs before a request is handled.
-	 *
-	 * @param \WP_REST_Request $request Request.
-	 * @return boolean True if the user has permission to make the request.
-	 */
-	public function permission_callback( \WP_REST_Request $request ) {
-		// Load cart early so sessions are available.
-		$this->cart_controller->load_cart();
-
-		if ( $this->requires_nonce( $request ) ) {
-			$nonce_error = $this->check_nonce( $request );
-
-			if ( is_wp_error( $nonce_error ) ) {
-				$server = rest_get_server();
-
-				foreach ( $this->get_nonce_headers() as $header => $value ) {
-					$server->send_header( $header, $value );
-				}
-
-				return $nonce_error;
-			}
-		}
-
-		return true;
 	}
 }

@@ -67,7 +67,7 @@ class Checkout extends AbstractCartRoute {
 			[
 				'methods'             => \WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'get_response' ],
-				'permission_callback' => [ $this, 'permission_callback' ],
+				'permission_callback' => '__return_true',
 				'args'                => [
 					'context' => $this->get_context_param( [ 'default' => 'view' ] ),
 				],
@@ -75,7 +75,7 @@ class Checkout extends AbstractCartRoute {
 			[
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'get_response' ],
-				'permission_callback' => [ $this, 'permission_callback' ],
+				'permission_callback' => '__return_true',
 				'args'                => array_merge(
 					[
 						'payment_data' => [
