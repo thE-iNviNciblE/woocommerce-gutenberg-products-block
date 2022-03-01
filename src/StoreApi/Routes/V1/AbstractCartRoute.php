@@ -82,10 +82,10 @@ abstract class AbstractCartRoute extends AbstractRoute {
 
 		if ( $this->requires_nonce( $request ) ) {
 			$this->add_nonce_headers();
-			$nonce_error = $this->check_nonce( $request );
+			$nonce_check = $this->check_nonce( $request );
 
-			if ( is_wp_error( $nonce_error ) ) {
-				return $nonce_error;
+			if ( is_wp_error( $nonce_check ) ) {
+				return $nonce_check;
 			}
 		}
 
