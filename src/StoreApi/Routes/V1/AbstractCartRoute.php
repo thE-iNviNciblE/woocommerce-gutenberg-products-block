@@ -107,6 +107,42 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	}
 
 	/**
+	 * Get a list of nonce headers.
+	 *
+	 * @return array
+	 */
+	protected function get_nonce_headers() {
+		return [
+			'X-WC-Store-API-Nonce'           => wp_create_nonce( 'wc_store_api' ),
+			'X-WC-Store-API-Nonce-Timestamp' => time(),
+			'X-WC-Store-API-User'            => get_current_user_id(),
+		];
+	}
+
+	/**
+	 * Get a list of nonce headers.
+	 *
+	 * @return array
+	 */
+	protected function add_nonce_headers() {
+		$server = rest_get_server();
+
+		foreach ( $this->get_nonce_headers() as $header => $value ) {
+			$server->send_header( $header, $value );
+		}
+	}
+
+	/**
+	 * Checks if a nonce is required for the route.
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @return bool
+	 */
+	protected function requires_nonce( \WP_REST_Request $request ) {
+		return $this->is_update_request( $request );
+	}
+
+	/**
 	 * Triggered after an update to cart data. Re-calculates totals and updates draft orders (if they already exist) to
 	 * keep all data in sync.
 	 *
@@ -137,42 +173,6 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		wc()->cart->calculate_fees();
 		wc()->cart->calculate_shipping();
 		wc()->cart->calculate_totals();
-	}
-
-	/**
-	 * Checks if a nonce is required for the route.
-	 *
-	 * @param \WP_REST_Request $request Request.
-	 * @return bool
-	 */
-	protected function requires_nonce( \WP_REST_Request $request ) {
-		return $this->is_update_request( $request );
-	}
-
-	/**
-	 * Get a list of nonce headers.
-	 *
-	 * @return array
-	 */
-	protected function get_nonce_headers() {
-		return [
-			'X-WC-Store-API-Nonce'           => wp_create_nonce( 'wc_store_api' ),
-			'X-WC-Store-API-Nonce-Timestamp' => time(),
-			'X-WC-Store-API-User'            => get_current_user_id(),
-		];
-	}
-
-	/**
-	 * Get a list of nonce headers.
-	 *
-	 * @return array
-	 */
-	protected function add_nonce_headers() {
-		$server = rest_get_server();
-
-		foreach ( $this->get_nonce_headers() as $header => $value ) {
-			$server->send_header( $header, $value );
-		}
 	}
 
 	/**
