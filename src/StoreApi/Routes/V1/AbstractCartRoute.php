@@ -120,9 +120,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	}
 
 	/**
-	 * Get a list of nonce headers.
-	 *
-	 * @return array
+	 * Add nonce headers to the response.
 	 */
 	protected function add_nonce_headers() {
 		$server = rest_get_server();
