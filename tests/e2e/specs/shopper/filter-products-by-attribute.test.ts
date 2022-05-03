@@ -68,7 +68,7 @@ describe( `${ block.name } Block`, () => {
 			await waitForAllProductsBlockLoaded();
 			const products = await page.$$( selectors.frontend.productsList );
 
-			expect( products ).toHaveLength( 4 );
+			expect( products ).toHaveLength( 5 );
 		} );
 
 		it( 'should show only products that match the filter', async () => {
@@ -109,7 +109,7 @@ describe( `${ block.name } Block`, () => {
 				selectors.frontend.classicProductsList
 			);
 
-			expect( products ).toHaveLength( 4 );
+			expect( products ).toHaveLength( 5 );
 		} );
 
 		it( 'should show only products that match the filter', async () => {
