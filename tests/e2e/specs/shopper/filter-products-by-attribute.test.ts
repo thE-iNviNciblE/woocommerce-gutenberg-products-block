@@ -127,12 +127,9 @@ describe( `${ block.name } Block`, () => {
 			const isRefreshed = jest.fn( () => void 0 );
 			page.on( 'load', isRefreshed );
 
-			await page.waitForSelector(
-				selectors.frontend.attributeFilterBlock + '.is-loading',
-				{
-					hidden: true,
-				}
-			);
+			await page.waitForSelector( block.class + '.is-loading', {
+				hidden: true,
+			} );
 
 			await Promise.all( [
 				page.waitForNavigation( {

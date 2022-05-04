@@ -6,9 +6,11 @@ import {
 	switchUserToAdmin,
 	publishPost,
 } from '@wordpress/e2e-test-utils';
+import { Frame } from 'puppeteer';
 import {
 	BASE_URL,
 	goToTemplateEditor,
+	openBlockEditorSettings,
 	saveTemplate,
 	useTheme,
 } from '../../utils';
@@ -16,17 +18,20 @@ import {
 const block = {
 	name: 'Filter Products by Stock',
 	slug: 'woocommerce/filter-products-by-stock',
-	class: '.wc-block-attribute-filter',
+	class: '.wc-block-stock-filter',
 	selectors: {
 		editor: {
 			doneButton: '.wc-block-attribute-filter__selection > button',
+			filterButtonToggle: "//label[text()='Filter button']",
 		},
 		frontend: {
 			productsList: '.wc-block-grid__products > li',
 			classicProductsList: '.products.columns-3 > li',
 			filter: "input[id='outofstock']",
+			submitButton: '.wc-block-components-filter-submit-button',
 		},
 	},
+	urlSearchParamWhenFilterIsApplied: '?filter_stock_status=outofstock',
 };
 
 const waitForAllProductsBlockLoaded = () =>
@@ -34,9 +39,14 @@ const waitForAllProductsBlockLoaded = () =>
 		hidden: true,
 	} );
 
+const goToShopPage = () =>
+	page.goto( BASE_URL + '/shop', {
+		waitUntil: 'networkidle0',
+	} );
+
 const { selectors } = block;
 
-describe( `${ block.name } Block`, () => {
+fdescribe( `${ block.name } Block`, () => {
 	describe( 'with All Product Block', () => {
 		let link = '';
 		beforeAll( async () => {
@@ -76,10 +86,13 @@ describe( `${ block.name } Block`, () => {
 	} );
 
 	describe( 'with PHP classic template ', () => {
+		const productCatalogTemplateId =
+			'woocommerce/woocommerce//archive-product';
+
 		useTheme( 'emptytheme' );
 		beforeAll( async () => {
 			await goToTemplateEditor( {
-				postId: `woocommerce/woocommerce//archive-product`,
+				postId: productCatalogTemplateId,
 			} );
 			await insertBlock( block.name );
 			await saveTemplate();
@@ -113,9 +126,51 @@ describe( `${ block.name } Block`, () => {
 			expect( isRefreshed ).toBeCalled();
 			expect( products ).toHaveLength( 1 );
 		} );
-	} );
 
-	afterAll( async () => {
-		await deleteAllTemplates( 'wp_template' );
+		it( 'should refresh the page only if the user click on button', async () => {
+			await goToTemplateEditor( {
+				postId: productCatalogTemplateId,
+			} );
+
+			const canvasEl: Frame = canvas();
+			await canvasEl.click( block.class );
+			await openBlockEditorSettings();
+			const [ filterButtonToggle ] = await page.$x(
+				block.selectors.editor.filterButtonToggle
+			);
+			await filterButtonToggle.click();
+			await saveTemplate();
+			await goToShopPage();
+
+			const isRefreshed = jest.fn( () => void 0 );
+			page.on( 'load', isRefreshed );
+			await page.waitForSelector( block.class + '.is-loading', {
+				hidden: true,
+			} );
+			await page.waitForSelector( selectors.frontend.filter );
+			await page.click( selectors.frontend.filter ),
+				await Promise.all( [
+					page.waitForNavigation( {
+						waitUntil: 'networkidle0',
+					} ),
+					page.click( selectors.frontend.submitButton ),
+				] );
+
+			const products = await page.$$(
+				selectors.frontend.classicProductsList
+			);
+			const pageURL = page.url();
+			const parsedUrl = new URL( pageURL );
+
+			expect( isRefreshed ).toBeCalledTimes( 1 );
+			expect( products ).toHaveLength( 1 );
+			expect( parsedUrl.search ).toEqual(
+				block.urlSearchParamWhenFilterIsApplied
+			);
+		} );
+
+		afterAll( async () => {
+			await deleteAllTemplates( 'wp_template' );
+		} );
 	} );
 } );
