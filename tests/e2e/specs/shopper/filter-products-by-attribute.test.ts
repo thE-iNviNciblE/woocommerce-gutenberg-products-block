@@ -31,7 +31,6 @@ const block = {
 				'.wc-block-attribute-filter-list > li:not([class^="is-loading"])',
 			productsList: '.wc-block-grid__products > li',
 			classicProductsList: '.products.columns-3 > li',
-			attributeFilterBlock: '.wp-block-woocommerce-attribute-filter',
 			filter: "input[id='128gb']",
 			submitButton: '.wc-block-components-filter-submit-button',
 		},
@@ -169,12 +168,9 @@ describe( `${ block.name } Block`, () => {
 
 			const isRefreshed = jest.fn( () => void 0 );
 			page.on( 'load', isRefreshed );
-			await page.waitForSelector(
-				selectors.frontend.attributeFilterBlock + '.is-loading',
-				{
-					hidden: true,
-				}
-			);
+			await page.waitForSelector( block.class + '.is-loading', {
+				hidden: true,
+			} );
 			await page.waitForSelector( selectors.frontend.filter );
 			await page.click( selectors.frontend.filter ),
 				await Promise.all( [

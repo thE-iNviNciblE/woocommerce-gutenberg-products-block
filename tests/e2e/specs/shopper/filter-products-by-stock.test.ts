@@ -112,7 +112,10 @@ fdescribe( `${ block.name } Block`, () => {
 		it( 'should show only products that match the filter', async () => {
 			const isRefreshed = jest.fn( () => void 0 );
 			page.on( 'load', isRefreshed );
-			await page.waitForSelector( selectors.frontend.filter );
+			await page.waitForSelector( block.class + '.is-loading', {
+				hidden: true,
+			} );
+
 			await Promise.all( [
 				page.waitForNavigation( {
 					waitUntil: 'networkidle0',
@@ -123,7 +126,7 @@ fdescribe( `${ block.name } Block`, () => {
 				selectors.frontend.classicProductsList
 			);
 
-			expect( isRefreshed ).toBeCalled();
+			expect( isRefreshed ).toBeCalledTimes( 1 );
 			expect( products ).toHaveLength( 1 );
 		} );
 
