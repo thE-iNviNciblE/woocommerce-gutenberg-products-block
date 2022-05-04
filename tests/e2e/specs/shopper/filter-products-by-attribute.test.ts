@@ -115,6 +115,8 @@ describe( `${ block.name } Block`, () => {
 		it( 'should show only products that match the filter', async () => {
 			const isRefreshed = jest.fn( () => void 0 );
 			page.on( 'load', isRefreshed );
+			const url = page.url();
+
 			await page.waitForSelector(
 				selectors.frontend.attributeFilterBlock + '.is-loading',
 				{
@@ -132,8 +134,11 @@ describe( `${ block.name } Block`, () => {
 				selectors.frontend.classicProductsList
 			);
 
-			expect( isRefreshed ).toBeCalled();
+			const newUrl = page.url();
+
+			expect( isRefreshed ).toBeCalledTimes( 1 );
 			expect( products ).toHaveLength( 1 );
+			expect( newUrl ).toEqual( url );
 		} );
 	} );
 
