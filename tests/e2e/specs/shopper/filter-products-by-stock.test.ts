@@ -21,7 +21,6 @@ const block = {
 	class: '.wc-block-stock-filter',
 	selectors: {
 		editor: {
-			doneButton: '.wc-block-attribute-filter__selection > button',
 			filterButtonToggle: "//label[text()='Filter button']",
 		},
 		frontend: {
