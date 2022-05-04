@@ -139,6 +139,9 @@ describe( `${ block.name } Block`, () => {
 			const canvasEl: Frame = canvas();
 			await canvasEl.click( block.class );
 			await openBlockEditorSettings();
+			await page.waitForXPath(
+				block.selectors.editor.filterButtonToggle
+			);
 			const [ filterButtonToggle ] = await page.$x(
 				selectors.editor.filterButtonToggle
 			);
