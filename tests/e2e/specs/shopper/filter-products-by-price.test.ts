@@ -13,6 +13,7 @@ import {
 	openBlockEditorSettings,
 	saveTemplate,
 	useTheme,
+	waitForCanvas,
 } from '../../utils';
 
 const block = {
@@ -139,6 +140,7 @@ describe( `${ block.name } Block`, () => {
 				postId: productCatalogTemplateId,
 			} );
 
+			await waitForCanvas();
 			const canvasEl: Frame = canvas();
 			await canvasEl.click( block.class );
 			await openBlockEditorSettings();
