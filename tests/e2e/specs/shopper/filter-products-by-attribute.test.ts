@@ -7,9 +7,11 @@ import {
 	publishPost,
 } from '@wordpress/e2e-test-utils';
 import { Frame } from 'puppeteer';
+import { selectBlockByName } from '@woocommerce/blocks-test-utils';
 import {
 	BASE_URL,
 	goToTemplateEditor,
+	openBlockEditorSettings,
 	saveTemplate,
 	useTheme,
 } from '../../utils';
@@ -22,6 +24,7 @@ const block = {
 		editor: {
 			firstAttributeInTheList:
 				'.woocommerce-search-list__list > li > label > input.woocommerce-search-list__item-input',
+			filterButtonToggle: "//label[text()='Filter button']",
 			doneButton: '.wc-block-attribute-filter__selection > button',
 		},
 		frontend: {
@@ -29,15 +32,22 @@ const block = {
 				'.wc-block-attribute-filter-list > li:not([class^="is-loading"])',
 			productsList: '.wc-block-grid__products > li',
 			classicProductsList: '.products.columns-3 > li',
-			attributeFilterBlock: '.wp-block-woocommerce-attribute-filter',
 			filter: "input[id='128gb']",
+			submitButton: '.wc-block-components-filter-submit-button',
 		},
 	},
+	urlSearchParamWhenFilterIsApplied:
+		'?filter_capacity=128gb&query_type_capacity=or',
 };
 
 const waitForAllProductsBlockLoaded = () =>
 	page.waitForSelector( selectors.frontend.productsList + '.is-loading', {
 		hidden: true,
+	} );
+
+const goToShopPage = () =>
+	page.goto( BASE_URL + '/shop', {
+		waitUntil: 'networkidle0',
 	} );
 
 const { selectors } = block;
@@ -84,10 +94,13 @@ describe( `${ block.name } Block`, () => {
 	} );
 
 	describe( 'with PHP classic template ', () => {
+		const productCatalogTemplateId =
+			'woocommerce/woocommerce//archive-product';
+
 		useTheme( 'emptytheme' );
 		beforeAll( async () => {
 			await goToTemplateEditor( {
-				postId: `woocommerce/woocommerce//archive-product`,
+				postId: productCatalogTemplateId,
 			} );
 			await insertBlock( block.name );
 			const canvasEl: Frame = canvas();
@@ -102,9 +115,7 @@ describe( `${ block.name } Block`, () => {
 		} );
 
 		it( 'should render', async () => {
-			await page.goto( BASE_URL + '/shop', {
-				waitUntil: 'networkidle0',
-			} );
+			await goToShopPage();
 			const products = await page.$$(
 				selectors.frontend.classicProductsList
 			);
@@ -115,30 +126,71 @@ describe( `${ block.name } Block`, () => {
 		it( 'should show only products that match the filter', async () => {
 			const isRefreshed = jest.fn( () => void 0 );
 			page.on( 'load', isRefreshed );
-			const url = page.url();
 
-			await page.waitForSelector(
-				selectors.frontend.attributeFilterBlock + '.is-loading',
-				{
-					hidden: true,
-				}
-			);
-			await page.waitForSelector( selectors.frontend.filter );
+			await page.waitForSelector( block.class + '.is-loading', {
+				hidden: true,
+			} );
+
 			await Promise.all( [
 				page.waitForNavigation( {
 					waitUntil: 'networkidle0',
 				} ),
 				page.click( selectors.frontend.filter ),
 			] );
+
 			const products = await page.$$(
 				selectors.frontend.classicProductsList
 			);
 
-			const newUrl = page.url();
+			const pageURL = page.url();
+			const parsedUrl = new URL( pageURL );
 
 			expect( isRefreshed ).toBeCalledTimes( 1 );
 			expect( products ).toHaveLength( 1 );
-			expect( newUrl ).toEqual( url );
+			expect( parsedUrl.search ).toEqual(
+				block.urlSearchParamWhenFilterIsApplied
+			);
+		} );
+
+		it( 'should refresh the page only if the user click on button', async () => {
+			await goToTemplateEditor( {
+				postId: productCatalogTemplateId,
+			} );
+
+			await selectBlockByName( block.slug );
+			await openBlockEditorSettings();
+			const [ filterButtonToggle ] = await page.$x(
+				block.selectors.editor.filterButtonToggle
+			);
+			await filterButtonToggle.click();
+			await saveTemplate();
+			await goToShopPage();
+
+			const isRefreshed = jest.fn( () => void 0 );
+			page.on( 'load', isRefreshed );
+			await page.waitForSelector( block.class + '.is-loading', {
+				hidden: true,
+			} );
+			await page.waitForSelector( selectors.frontend.filter );
+			await page.click( selectors.frontend.filter ),
+				await Promise.all( [
+					page.waitForNavigation( {
+						waitUntil: 'networkidle0',
+					} ),
+					page.click( selectors.frontend.submitButton ),
+				] );
+
+			const products = await page.$$(
+				selectors.frontend.classicProductsList
+			);
+			const pageURL = page.url();
+			const parsedUrl = new URL( pageURL );
+
+			expect( isRefreshed ).toBeCalledTimes( 1 );
+			expect( products ).toHaveLength( 1 );
+			expect( parsedUrl.search ).toEqual(
+				block.urlSearchParamWhenFilterIsApplied
+			);
 		} );
 	} );
 
