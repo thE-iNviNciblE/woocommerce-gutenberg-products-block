@@ -13,6 +13,7 @@ import {
 	openBlockEditorSettings,
 	saveTemplate,
 	useTheme,
+	waitForCanvas,
 } from '../../utils';
 
 const block = {
@@ -21,7 +22,6 @@ const block = {
 	class: '.wc-block-stock-filter',
 	selectors: {
 		editor: {
-			doneButton: '.wc-block-attribute-filter__selection > button',
 			filterButtonToggle: "//label[text()='Filter button']",
 		},
 		frontend: {
@@ -46,7 +46,7 @@ const goToShopPage = () =>
 
 const { selectors } = block;
 
-fdescribe( `${ block.name } Block`, () => {
+describe( `${ block.name } Block`, () => {
 	describe( 'with All Product Block', () => {
 		let link = '';
 		beforeAll( async () => {
@@ -135,11 +135,12 @@ fdescribe( `${ block.name } Block`, () => {
 				postId: productCatalogTemplateId,
 			} );
 
+			await waitForCanvas();
 			const canvasEl: Frame = canvas();
 			await canvasEl.click( block.class );
 			await openBlockEditorSettings();
 			const [ filterButtonToggle ] = await page.$x(
-				block.selectors.editor.filterButtonToggle
+				selectors.editor.filterButtonToggle
 			);
 			await filterButtonToggle.click();
 			await saveTemplate();
