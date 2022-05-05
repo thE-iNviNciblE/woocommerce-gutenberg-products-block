@@ -6,7 +6,7 @@ import {
 	switchUserToAdmin,
 	publishPost,
 } from '@wordpress/e2e-test-utils';
-import { Frame } from 'puppeteer';
+import { selectBlockByName } from '@woocommerce/blocks-test-utils';
 import {
 	BASE_URL,
 	goToTemplateEditor,
@@ -140,9 +140,7 @@ describe( `${ block.name } Block`, () => {
 				postId: productCatalogTemplateId,
 			} );
 
-			await waitForCanvas();
-			const canvasEl: Frame = canvas();
-			await canvasEl.click( block.class );
+			await selectBlockByName( block.slug );
 			await openBlockEditorSettings();
 			await page.waitForXPath(
 				block.selectors.editor.filterButtonToggle
