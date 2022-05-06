@@ -146,7 +146,7 @@ fdescribe( `${ block.name } Block`, () => {
 			await selectBlockByName( block.slug );
 			await page.waitForTimeout( 5000 );
 
-			await openBlockEditorSettings();
+			// await openBlockEditorSettings();
 
 			const test = await page.$eval(
 				'.edit-site-sidebar__panel-tab.is-active',
