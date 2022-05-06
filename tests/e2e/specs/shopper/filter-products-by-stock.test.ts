@@ -45,7 +45,7 @@ const goToShopPage = () =>
 
 const { selectors } = block;
 
-describe( `${ block.name } Block`, () => {
+fdescribe( `${ block.name } Block`, () => {
 	describe( 'with All Product Block', () => {
 		let link = '';
 		beforeAll( async () => {
