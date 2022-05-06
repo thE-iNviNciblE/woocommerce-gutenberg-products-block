@@ -177,13 +177,13 @@ describe( `${ block.name } Block`, () => {
 				hidden: true,
 			} );
 			await page.waitForSelector( selectors.frontend.filter );
-			await page.click( selectors.frontend.filter ),
-				await Promise.all( [
-					page.waitForNavigation( {
-						waitUntil: 'networkidle0',
-					} ),
-					page.click( selectors.frontend.submitButton ),
-				] );
+			await page.click( selectors.frontend.filter );
+			await Promise.all( [
+				page.waitForNavigation( {
+					waitUntil: 'networkidle0',
+				} ),
+				page.click( selectors.frontend.submitButton ),
+			] );
 
 			const products = await page.$$(
 				selectors.frontend.classicProductsList

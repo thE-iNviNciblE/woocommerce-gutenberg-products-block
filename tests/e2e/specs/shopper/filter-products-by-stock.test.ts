@@ -45,7 +45,7 @@ const goToShopPage = () =>
 
 const { selectors } = block;
 
-fdescribe( `${ block.name } Block`, () => {
+describe( `${ block.name } Block`, () => {
 	describe( 'with All Product Block', () => {
 		let link = '';
 		beforeAll( async () => {
@@ -84,7 +84,7 @@ fdescribe( `${ block.name } Block`, () => {
 		} );
 	} );
 
-	fdescribe( 'with PHP classic template ', () => {
+	describe( 'with PHP classic template ', () => {
 		const productCatalogTemplateId =
 			'woocommerce/woocommerce//archive-product';
 
@@ -108,6 +108,7 @@ fdescribe( `${ block.name } Block`, () => {
 			await page.goto( BASE_URL + '/shop', {
 				waitUntil: 'networkidle0',
 			} );
+
 			const products = await page.$$(
 				selectors.frontend.classicProductsList
 			);
@@ -142,24 +143,10 @@ fdescribe( `${ block.name } Block`, () => {
 			} );
 
 			await waitForCanvas();
-			await page.waitForTimeout( 5000 );
 			await selectBlockByName( block.slug );
-			await page.waitForTimeout( 5000 );
-
 			// await openBlockEditorSettings();
-
-			const test = await page.$eval(
-				'.edit-site-sidebar__panel-tab.is-active',
-				( element ) => element.getAttribute( 'aria-label' )
-			);
-
-			console.log( test );
-
-			await page.waitForTimeout( 5000 );
-
 			await page.waitForXPath(
-				block.selectors.editor.filterButtonToggle,
-				{ timeout: 90000 }
+				block.selectors.editor.filterButtonToggle
 			);
 			const [ filterButtonToggle ] = await page.$x(
 				selectors.editor.filterButtonToggle
@@ -174,19 +161,24 @@ fdescribe( `${ block.name } Block`, () => {
 				hidden: true,
 			} );
 			await page.waitForSelector( selectors.frontend.filter );
-			await page.click( selectors.frontend.filter ),
-				await Promise.all( [
-					page.waitForNavigation( {
-						waitUntil: 'networkidle0',
-					} ),
-					page.click( selectors.frontend.submitButton ),
-				] );
+
+			await page.$eval( selectors.frontend.filter, ( elem ) =>
+				elem.click()
+			);
+
+			await Promise.all( [
+				page.waitForNavigation( {
+					waitUntil: 'networkidle0',
+				} ),
+				page.click( selectors.frontend.submitButton ),
+			] );
+
+			const pageURL = page.url();
+			const parsedUrl = new URL( pageURL );
 
 			const products = await page.$$(
 				selectors.frontend.classicProductsList
 			);
-			const pageURL = page.url();
-			const parsedUrl = new URL( pageURL );
 
 			expect( isRefreshed ).toBeCalledTimes( 1 );
 			expect( products ).toHaveLength( 1 );
