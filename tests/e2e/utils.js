@@ -435,5 +435,8 @@ export const createCoupon = async ( coupon ) => {
 /**
  * Open the block editor settings menu.
  */
-export const openBlockEditorSettings = () =>
-	page.click( '.components-button.has-icon[aria-label="Settings"]' );
+export const openBlockEditorSettings = async () => {
+	await page.click(
+		'.edit-site-header__actions button[aria-label="Settings"]'
+	);
+};

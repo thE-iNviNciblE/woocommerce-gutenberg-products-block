@@ -147,6 +147,14 @@ fdescribe( `${ block.name } Block`, () => {
 			await page.waitForTimeout( 5000 );
 
 			await openBlockEditorSettings();
+
+			const test = await page.$eval(
+				'.edit-site-sidebar__panel-tab.is-active',
+				( element ) => element.getAttribute( 'aria-label' )
+			);
+
+			console.log( test );
+
 			await page.waitForTimeout( 5000 );
 
 			await page.waitForXPath(
