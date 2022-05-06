@@ -113,6 +113,11 @@ describe( `${ block.name } Block`, () => {
 			await saveTemplate();
 		} );
 
+		afterAll( async () => {
+			await deleteAllTemplates( 'wp_template' );
+			await deleteAllTemplates( 'wp_template_part' );
+		} );
+
 		it( 'should render', async () => {
 			await goToShopPage();
 			const products = await page.$$(
@@ -192,9 +197,5 @@ describe( `${ block.name } Block`, () => {
 				block.urlSearchParamWhenFilterIsApplied
 			);
 		} );
-	} );
-
-	afterAll( async () => {
-		await deleteAllTemplates( 'wp_template' );
 	} );
 } );

@@ -99,6 +99,11 @@ fdescribe( `${ block.name } Block`, () => {
 			await saveTemplate();
 		} );
 
+		afterAll( async () => {
+			await deleteAllTemplates( 'wp_template' );
+			await deleteAllTemplates( 'wp_template_part' );
+		} );
+
 		it( 'should render', async () => {
 			await page.goto( BASE_URL + '/shop', {
 				waitUntil: 'networkidle0',
@@ -180,11 +185,6 @@ fdescribe( `${ block.name } Block`, () => {
 			expect( parsedUrl.search ).toEqual(
 				block.urlSearchParamWhenFilterIsApplied
 			);
-		} );
-
-		afterAll( async () => {
-			await deleteAllTemplates( 'wp_template' );
-			await deleteAllTemplates( 'wp_template_part' );
 		} );
 	} );
 } );
